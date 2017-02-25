@@ -14,6 +14,7 @@
 		8AC909481E608A4E0038F48F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8AC909461E608A4E0038F48F /* Main.storyboard */; };
 		8AC9094A1E608A4E0038F48F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8AC909491E608A4E0038F48F /* Assets.xcassets */; };
 		8AC9094D1E608A4E0038F48F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8AC9094B1E608A4E0038F48F /* LaunchScreen.storyboard */; };
+		8AF3E0711E619B11005131E7 /* PBTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF3E0701E619B11005131E7 /* PBTypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		8AC909491E608A4E0038F48F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8AC9094C1E608A4E0038F48F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8AC9094E1E608A4E0038F48F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8AF3E0701E619B11005131E7 /* PBTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PBTypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				8AC9094E1E608A4E0038F48F /* Info.plist */,
 				8A5355C11E60C03B00DD28A7 /* PARender.swift */,
 				8A5355FB1E60DE8900DD28A7 /* PAMetal.metal */,
+				8AF3E0701E619B11005131E7 /* PBTypes.swift */,
 			);
 			path = Break;
 			sourceTree = "<group>";
@@ -143,6 +146,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AF3E0711E619B11005131E7 /* PBTypes.swift in Sources */,
 				8AC909451E608A4E0038F48F /* ViewController.swift in Sources */,
 				8AC909431E608A4E0038F48F /* AppDelegate.swift in Sources */,
 				8A5355FC1E60DE8900DD28A7 /* PAMetal.metal in Sources */,
