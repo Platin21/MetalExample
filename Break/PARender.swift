@@ -15,6 +15,23 @@ enum Colors
 }
 
 
+let vertexData:[Float] = [
+    -1.0 , -1.0, 1.0, 1.0,
+    -1.0 ,  1.0, 1.0, 1.0,
+    1.0  , -1.0, 1.0, 1.0
+]
+
+let ColorData:[Float] = [
+    0.0, 0.25, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.25, 0.0, 1.0
+]
+
+
+func ownView(pos:Float)
+{
+    
+}
 
 
 class PARender : NSObject , MTKViewDelegate
@@ -30,36 +47,63 @@ class PARender : NSObject , MTKViewDelegate
     var vertexBF : MTLBuffer! = nil
     var vertexColorBF : MTLBuffer! = nil
     
+    var drawn : Bool = false;
+    
     init(device:MTLDevice,view:MTKView)
     {
         super.init()
         
+        self.view = view;
+        self.view.delegate = self;
+        self.view.clearColor = Colors.projektblue_blue
         
         self.MakeDevice(mtldevice: device);
-        self.LoadShaders(lenght: 144 * 4)
+        self.LoadShaders(vertexBuffer: vertexData ,colorBuffer: ColorData )
     }
     
     func draw(in view: MTKView) {
-        
-        view.clearColor = Colors.projektblue_blue;
-        
-        guard
-            let drawable = view.currentDrawable,
-            let desc = view.currentRenderPassDescriptor
-        else
+        if !drawn
         {
-            return
+            let _ = inflightSema.wait(timeout: DispatchTime.distantFuture)
+        
+        
+        
+            let cmdBuffer = cmdQueue.makeCommandBuffer()
+            cmdBuffer.label = "Frame cmdBuffer"
+        
+            cmdBuffer.addCompletedHandler{
+                    [weak self] cmdBuffer in
+                if let strongSelf = self
+                {
+                    strongSelf.inflightSema.signal()
+                }
+                return
+            }
+        
+            guard
+                let drawable = view.currentDrawable,
+                let desc = view.currentRenderPassDescriptor
+            else
+            {
+                return
+            }
+        
+            let cmdEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)
+            cmdEncoder.label = "Encoder"
+        
+            //Add some Loading !
+            cmdEncoder.pushDebugGroup("Draw Triangle")
+            cmdEncoder.setRenderPipelineState(pipeState)
+            cmdEncoder.setVertexBuffer(vertexBF, offset: 0, at: 0)
+            cmdEncoder.setVertexBuffer(vertexColorBF, offset: 0, at: 1)
+            cmdEncoder.drawPrimitives(type: .triangle , vertexStart: 0, vertexCount: 3)
+            cmdEncoder.popDebugGroup()
+            cmdEncoder.endEncoding()
+        
+            cmdBuffer.present(drawable)
+            cmdBuffer.commit()
+            drawn = true;
         }
-        
-        let cmdBuffer = cmdQueue.makeCommandBuffer()
-        let cmdEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)
-        
-        //Add some Loading !
-        
-        cmdEncoder.endEncoding()
-        cmdBuffer.present(drawable)
-        cmdBuffer.commit()
-        
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -80,7 +124,7 @@ extension PARender {
         self.cmdQueue.label = "Main Command Queue"
     }
     
-    func LoadShaders(lenght:int)
+    func LoadShaders(vertexBuffer:[f32],colorBuffer:[f32])
     {
         let lib = self.device.newDefaultLibrary()!;
         lib.label = "Main Lib";
@@ -106,8 +150,13 @@ extension PARender {
           print("Error Piplinestate: \(error)")
         }
         
-        vertexBF = device.makeBuffer(length: lenght, options: [])
+        let vertexBfSize = vertexBuffer.count * MemoryLayout<Float>.stride * 4
+        vertexBF = device.makeBuffer(bytes: vertexData,length: vertexBfSize, options: [])
+        vertexBF.label = "vertices"
         
+        let ColorBfSize = colorBuffer.count * MemoryLayout<Float>.stride
+        vertexColorBF = device.makeBuffer(bytes: colorBuffer ,length: ColorBfSize, options: [])
+        vertexColorBF.label = "colors"
         
     }
 }
