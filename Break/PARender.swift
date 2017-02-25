@@ -26,6 +26,7 @@ class PARender : NSObject , MTKViewDelegate
     
     var pipeState:MTLRenderPipelineState! = nil
     
+    //Buffer for Vertex and Vertecis
     var vertexBF : MTLBuffer! = nil
     var vertexColorBF : MTLBuffer! = nil
     
@@ -33,8 +34,9 @@ class PARender : NSObject , MTKViewDelegate
     {
         super.init()
         
+        
         self.MakeDevice(mtldevice: device);
-        self.LoadShaders()
+        self.LoadShaders(lenght: 144 * 4)
     }
     
     func draw(in view: MTKView) {
@@ -52,7 +54,7 @@ class PARender : NSObject , MTKViewDelegate
         let cmdBuffer = cmdQueue.makeCommandBuffer()
         let cmdEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)
         
-        
+        //Add some Loading !
         
         cmdEncoder.endEncoding()
         cmdBuffer.present(drawable)
@@ -71,9 +73,6 @@ class PARender : NSObject , MTKViewDelegate
 
 extension PARender {
     
-    
-    
-    
     func MakeDevice(mtldevice:MTLDevice)
     {
         self.device = mtldevice;
@@ -81,7 +80,7 @@ extension PARender {
         self.cmdQueue.label = "Main Command Queue"
     }
     
-    func LoadShaders()
+    func LoadShaders(lenght:int)
     {
         let lib = self.device.newDefaultLibrary()!;
         lib.label = "Main Lib";
@@ -107,7 +106,7 @@ extension PARender {
           print("Error Piplinestate: \(error)")
         }
         
-        
+        vertexBF = device.makeBuffer(length: lenght, options: [])
         
         
     }
