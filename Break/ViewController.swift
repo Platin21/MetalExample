@@ -27,7 +27,6 @@ class ViewController: UIViewController
         
         mtlview.device = MTLCreateSystemDefaultDevice();
         paRender = PARender(device: mtlview.device!,view:mtlview)
-        mtlview.delegate = paRender;
         
     }
     
