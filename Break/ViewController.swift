@@ -24,6 +24,7 @@ class ViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        
         mtlview.device = MTLCreateSystemDefaultDevice();
         paRender = PARender(device: mtlview.device!)
         mtlview.delegate = paRender;
