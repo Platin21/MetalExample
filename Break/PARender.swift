@@ -28,12 +28,6 @@ let ColorData:[Float] = [
 ]
 
 
-func ownView(pos:Float)
-{
-    
-}
-
-
 class PARender : NSObject , MTKViewDelegate
 {
     var device: MTLDevice!
