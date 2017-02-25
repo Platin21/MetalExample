@@ -21,13 +21,18 @@ class PARender : NSObject , MTKViewDelegate
 {
     var device: MTLDevice!
     var cmdQueue : MTLCommandQueue!
-    
+    var view : MTKView!
     var inflightSema = DispatchSemaphore(value: 3)
     
+    var pipeState:MTLRenderPipelineState! = nil
     
-    init(device:MTLDevice)
+    var vertexBF : MTLBuffer! = nil
+    var vertexColorBF : MTLBuffer! = nil
+    
+    init(device:MTLDevice,view:MTKView)
     {
         super.init()
+        
         self.MakeDevice(mtldevice: device);
         self.LoadShaders()
     }
@@ -66,6 +71,9 @@ class PARender : NSObject , MTKViewDelegate
 
 extension PARender {
     
+    
+    
+    
     func MakeDevice(mtldevice:MTLDevice)
     {
         self.device = mtldevice;
@@ -87,7 +95,20 @@ extension PARender {
         let piplineDesc = MTLRenderPipelineDescriptor()
         piplineDesc.vertexFunction = vertexprg;
         piplineDesc.fragmentFunction = fragmentprg;
-        piplineDesc.colorAttachments[0].pixelFormat = 
+        piplineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
+        piplineDesc.sampleCount = view.sampleCount
+        
+        do
+        {
+            try pipeState = device.makeRenderPipelineState(descriptor: piplineDesc)
+        }
+        catch let error
+        {
+          print("Error Piplinestate: \(error)")
+        }
+        
+        
+        
         
     }
 }
