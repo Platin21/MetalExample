@@ -29,7 +29,7 @@ class PARender : NSObject , MTKViewDelegate
     {
         super.init()
         self.MakeDevice(mtldevice: device);
-        self.LoadFunctions()
+        self.LoadShaders()
     }
     
     func draw(in view: MTKView) {
@@ -57,7 +57,7 @@ class PARender : NSObject , MTKViewDelegate
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
-        //Make methods here
+        //Make methods for Resizing !
     
     }
     
@@ -73,7 +73,7 @@ extension PARender {
         self.cmdQueue.label = "Main Command Queue"
     }
     
-    func LoadFunctions()
+    func LoadShaders()
     {
         let lib = self.device.newDefaultLibrary()!;
         lib.label = "Main Lib";
@@ -83,6 +83,12 @@ extension PARender {
         let stateDescriptor = MTLRenderPipelineDescriptor()
         stateDescriptor.vertexFunction = vertexprg;
         stateDescriptor.fragmentFunction = fragmentprg;
+        
+        let piplineDesc = MTLRenderPipelineDescriptor()
+        piplineDesc.vertexFunction = vertexprg;
+        piplineDesc.fragmentFunction = fragmentprg;
+        piplineDesc.colorAttachments[0].pixelFormat = 
+        
     }
 }
 
