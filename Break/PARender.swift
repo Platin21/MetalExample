@@ -8,7 +8,7 @@
 
 import MetalKit
 
-enum Colors
+public enum Colors
 {
     //0.075 0.352 0.906 1
     static let projektblue_blue = MTLClearColor(red: 0.075, green: 0.352, blue: 0.906, alpha: 1.0)
@@ -28,11 +28,11 @@ let ColorData:[Float] = [
 ]
 
 
-class PARender : NSObject , MTKViewDelegate
+public class PARender : NSObject , MTKViewDelegate
 {
-    var device: MTLDevice!
-    var cmdQueue : MTLCommandQueue!
-    var view : MTKView!
+    public var device: MTLDevice!
+    public var cmdQueue : MTLCommandQueue!
+    public var view : MTKView!
     var inflightSema = DispatchSemaphore(value: 3)
     
     var pipeState:MTLRenderPipelineState! = nil
@@ -40,8 +40,6 @@ class PARender : NSObject , MTKViewDelegate
     //Buffer for Vertex and Vertecis
     var vertexBF : MTLBuffer! = nil
     var vertexColorBF : MTLBuffer! = nil
-    
-    var drawn : Bool = false;
     
     init(device:MTLDevice,view:MTKView)
     {
@@ -53,20 +51,17 @@ class PARender : NSObject , MTKViewDelegate
         
         self.MakeDevice(mtldevice: device);
         self.LoadShaders(vertexBuffer: vertexData ,colorBuffer: ColorData )
+        
+        
     }
     
-    func draw(in view: MTKView) {
-        if !drawn
-        {
+    public func draw(in view: MTKView) {
             let _ = inflightSema.wait(timeout: DispatchTime.distantFuture)
-        
-        
         
             let cmdBuffer = cmdQueue.makeCommandBuffer()
             cmdBuffer.label = "Frame cmdBuffer"
-        
             cmdBuffer.addCompletedHandler{
-                    [weak self] cmdBuffer in
+                [weak self] cmdBuffer in
                 if let strongSelf = self
                 {
                     strongSelf.inflightSema.signal()
@@ -85,7 +80,6 @@ class PARender : NSObject , MTKViewDelegate
             let cmdEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)
             cmdEncoder.label = "Encoder"
         
-            //Add some Loading !
             cmdEncoder.pushDebugGroup("Draw Triangle")
             cmdEncoder.setRenderPipelineState(pipeState)
             cmdEncoder.setVertexBuffer(vertexBF, offset: 0, at: 0)
@@ -96,15 +90,9 @@ class PARender : NSObject , MTKViewDelegate
         
             cmdBuffer.present(drawable)
             cmdBuffer.commit()
-            drawn = true;
-        }
     }
     
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        
-        //Make methods for Resizing !
-    
-    }
+    public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
     
 }
 
@@ -120,20 +108,18 @@ extension PARender {
     
     func LoadShaders(vertexBuffer:[f32],colorBuffer:[f32])
     {
+        /*
         let lib = self.device.newDefaultLibrary()!;
         lib.label = "Main Lib";
         let vertexprg   = lib.makeFunction(name: "Shader_vert")
         let fragmentprg = lib.makeFunction(name: "Shader_frag")
-        
-        let stateDescriptor = MTLRenderPipelineDescriptor()
-        stateDescriptor.vertexFunction = vertexprg;
-        stateDescriptor.fragmentFunction = fragmentprg;
         
         let piplineDesc = MTLRenderPipelineDescriptor()
         piplineDesc.vertexFunction = vertexprg;
         piplineDesc.fragmentFunction = fragmentprg;
         piplineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
         piplineDesc.sampleCount = view.sampleCount
+        
         
         do
         {
@@ -151,8 +137,72 @@ extension PARender {
         let ColorBfSize = colorBuffer.count * MemoryLayout<Float>.stride
         vertexColorBF = device.makeBuffer(bytes: colorBuffer ,length: ColorBfSize, options: [])
         vertexColorBF.label = "colors"
+        */
+        let tmp = triangle(device: device, cmdQueue: cmdQueue,format:view.colorPixelFormat,SampleCount: view.sampleCount, vertexBF: vertexBuffer, vertexCL: colorBuffer)
+        
+        pipeState = tmp.0
+        vertexBF = tmp.1
+        vertexColorBF = tmp.2
         
     }
 }
+
+func triangle(device:MTLDevice,cmdQueue:MTLCommandQueue,format:MTLPixelFormat,SampleCount:Int,vertexBF:[Float],vertexCL:[Float]) -> (MTLRenderPipelineState,MTLBuffer,MTLBuffer)
+{
+    var value:(MTLRenderPipelineState,MTLBuffer,MTLBuffer)! = nil;
+    
+    var PiplineState:MTLRenderPipelineState! = nil;
+    
+    let lib = device.newDefaultLibrary()!;
+    lib.label = "Main Lib";
+    
+    let vertexprg = lib.makeFunction(name: "Shader_vert")
+    let fragmentprg = lib.makeFunction(name: "Shader_frag")
+    
+    let stateDesc = MTLRenderPipelineDescriptor()
+    stateDesc.fragmentFunction = fragmentprg;
+    stateDesc.vertexFunction = vertexprg;
+    stateDesc.colorAttachments[0].pixelFormat = format
+    stateDesc.sampleCount = SampleCount
+    
+    do
+    {
+       try PiplineState = device.makeRenderPipelineState(descriptor: stateDesc);
+    }
+    catch let error
+    {
+        print("Pipeline Error: \(error)")
+    }
+    
+    let vertexBfSize = vertexBF.count * MemoryLayout<Float>.stride * 4
+    let vtrbf = device.makeBuffer(bytes: vertexBF,length: vertexBfSize, options: [])
+    vtrbf.label = "Vertex Buffer"
+    
+    let vertexBfCL = vertexCL.count * MemoryLayout<Float>.stride
+    let vtrc = device.makeBuffer(bytes: vertexCL,length: vertexBfCL, options: [])
+    vtrc.label = "Fragment Color"
+    
+    value = (PiplineState,vtrbf,vtrc);
+    
+    return value;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
